@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 )
 
 func readFile(filename string) {
@@ -17,11 +19,24 @@ func readFile(filename string) {
 	}
 }
 
+func printFileContents(reader io.Reader) {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		fmt.Print(scanner.Text())
+	}
+}
+
 func forever() {
 	for {
 		fmt.Print('h')
 	}
 }
 func main() {
-	readFile("abc.txt")
+	readFile("basic/loop/abc.txt")
+	s := `abc
+	def
+	ghk
+	lm""`
+	printFileContents(strings.NewReader(s))
+
 }

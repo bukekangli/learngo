@@ -1,4 +1,4 @@
-package container
+package nonrepeatingsubstr
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ func lengthOfNonRepeatString(s string) int {
 		if lastI, ok := lastOccurred[ch]; ok && lastI >= start {
 			start = lastI + 1
 		}
-		if i - start + 1 > maxLength {
+		if i-start+1 > maxLength {
 			maxLength = i - start + 1
 		}
 		lastOccurred[ch] = i

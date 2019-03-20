@@ -1,8 +1,11 @@
 package container
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
-func printArray(arr *[4]int)  {
+func printArray(arr *[4]int) {
 	for i, v := range arr {
 		fmt.Println(i, v)
 	}
@@ -23,4 +26,5 @@ func ArrayTest() {
 
 	printArray(&arrays2)
 	fmt.Println(arrays2)
+	os.Open()
 }

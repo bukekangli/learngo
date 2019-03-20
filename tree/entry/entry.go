@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"learngo/tree"
 	"golang.org/x/tools/container/intsets"
+	"learngo/tree"
 )
 
 type myTreeNode struct {
@@ -41,13 +41,12 @@ func main() {
 	root.Right = &tree.Node{5, nil, nil}
 	root.Right.Left = new(tree.Node)
 	root.Left.Right = tree.CreateNode(2)
-	//root.setValue(5)
-	//root.print()
-	root.Traverse()
-	fmt.Println()
-	myNode := myTreeNode{&root}
-	myNode.postOrder()
+	root.Right.Left.SetValue(4)
+	//root.Traverse()
 
-	fmt.Println()
-	testSparse()
+	nodeCount := 0
+	root.TraverseFunc(func(root *tree.Node) {
+		nodeCount++
+	})
+	fmt.Println(nodeCount)
 }
