@@ -2,7 +2,6 @@ package container
 
 import (
 	"fmt"
-	"os"
 )
 
 func printArray(arr *[4]int) {
@@ -26,5 +25,7 @@ func ArrayTest() {
 
 	printArray(&arrays2)
 	fmt.Println(arrays2)
-	os.Open()
+	a1 := []int{1, 2, 3}
+	a2 := []int{1, 4}
+	fmt.Println(a1, a2)
 }
