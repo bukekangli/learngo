@@ -11,6 +11,7 @@ func SliceTest() {
 	fmt.Println("array[2:6] = ", array[2:6])
 	fmt.Println("array[:6] = ", array[:6])
 	s1 := array[2:]
+	fmt.Println(len(s1))
 	fmt.Println("s1 = ", s1)
 	updateSlice(s1)
 	fmt.Printf("After updateSlice(s1)")
@@ -42,6 +43,6 @@ func SliceTest() {
 	fmt.Println("s3, s4, s5 = ", s3, s4, s5)
 	fmt.Println("array = ", array)
 
-	s1 = array[:len(array) - 1]
+	s1 = array[:len(array)-1]
 	fmt.Printf("s1 = %v lend(s1) = %d cap(s1)=%d\n", s1, len(s1), cap(s1))
 }
