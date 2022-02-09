@@ -75,3 +75,32 @@ func alterPrint() {
 		}
 	}()
 }
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+// 2数之和
+// 7->4->5 + 8->3->2 == 5->8->5
+func AddTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
+	return addTwoNumbers(l1, l2, 0)
+}
+
+func addTwoNumbers(l1 *ListNode, l2 *ListNode, carry int) *ListNode {
+	if l1 == nil && l2 == nil && carry == 0 {
+		return nil
+	}
+	if l1 != nil {
+		carry += l1.Val
+		l1 = l1.Next
+	}
+	if l2 != nil {
+		carry += l2.Val
+		l2 = l2.Next
+	}
+	dummy := &ListNode{
+		Val:  carry % 10,
+		Next: addTwoNumbers(l1, l2, carry/10),
+	}
+	return dummy
+}
