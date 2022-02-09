@@ -1,5 +1,10 @@
 package arithmetic
 
+import (
+	"fmt"
+	"sync"
+)
+
 // 给定一个数组奇数排前、偶数排后
 func SortOddEvenNum(l []int) []int {
 	length := len(l)
@@ -33,4 +38,40 @@ func SortOddEvenNum(l []int) []int {
 		}
 	}
 	return l
+}
+
+func alterPrint() {
+	letter, number := make(chan bool), make(chan bool)
+	wait := sync.WaitGroup{}
+	go func() {
+		i := 1
+		for {
+			select {
+			case <- letter:
+				fmt.Println(i)
+				i++
+				fmt.Println(i)
+				i++
+				number <- true
+			}
+		}
+	}()
+	wait.Add(1)
+	go func() {
+		c := 'A'
+		for {
+			select {
+			case <- number:
+				fmt.Println(c)
+				c++
+				fmt.Println(c)
+				c++
+				if c > 'Z' {
+					wait.Done()
+					return
+				}
+				letter <- true
+			}
+		}
+	}()
 }
