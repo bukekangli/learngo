@@ -827,7 +827,6 @@ func main() {
 	fmt.Println("removeDuplicateLetters: ", removeDuplicateLetters("cbacdcbc"))
 	fmt.Println("removeDuplicateLetters: ", removeDuplicateLetters("bcabc"))
 
-
 	//l := []int{4343, 1, 7, 13, 4, 234, 3234, 5, 6, 3, 8, 9, 11, 321, 224, 999, 123, 444, 333}
 	//fmt.Println(arithmetic.SortOddEvenNum([]int{1,2,3,4,5,6,7,8,9,11,321,224,999,123,444,333}))
 	//arithmetic.InsertSort(l)
