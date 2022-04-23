@@ -1,7 +1,9 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -816,8 +818,786 @@ func removeDuplicateLetters(s string) string {
 //	} else if
 //}
 
+func removeKdigits(num string, k int) string {
+	res := make([]rune, 0, len(num))
+	for _, n := range num {
+		for len(res) > 0 && k > 0 && res[len(res)-1] > n {
+			res = res[:len(res)-1]
+			k--
+		}
+		res = append(res, n)
+	}
+	firstElemetNotZero := false
+	s := ""
+	for i := 0; i < len(res)-k; i++ {
+		if res[i] == '0' && !firstElemetNotZero {
+			continue
+		}
+		firstElemetNotZero = true
+		s += string(res[i])
+	}
+	if len(s) == 0 {
+		return "0"
+	}
+	return s
+}
+
+func maxNumber(nums1 []int, nums2 []int, k int) []int {
+	res := make([]int, 0, k)
+	for k1 := 0; k1 < k; k1++ {
+		k2 := k - k1
+		if k1 > len(nums1) || k2 > len(nums2) {
+			continue
+		}
+		nums1Part := maxList(nums1, k1)
+		nums2Part := maxList(nums2, k2)
+		resTemp := merge(nums1Part, nums2Part)
+		if isLessThan(res, resTemp) {
+			res = resTemp
+		}
+	}
+	return res
+}
+
+func maxList(nums []int, k int) []int {
+	if k == 0 {
+		return nil
+	}
+	res := make([]int, 0, k)
+	for index, n := range nums {
+		for len(res) > 0 && res[len(res)-1] < n && len(res)+len(nums)-index > k {
+			res = res[:len(res)-1]
+		}
+		res = append(res, n)
+	}
+	return res[:k]
+}
+
+func merge(nums1, nums2 []int) []int {
+	res := make([]int, len(nums1)+len(nums2))
+	for i := range res {
+		if isLessThan(nums1, nums2) {
+			res[i], nums2 = nums2[0], nums2[1:]
+		} else {
+			res[i], nums1 = nums1[0], nums1[1:]
+		}
+	}
+	return res
+}
+
+func isLessThan(nums1, nums2 []int) bool {
+	for i := 0; i < len(nums1) && i < len(nums2); i++ {
+		if nums1[i] != nums2[i] {
+			return nums1[i] < nums2[i]
+		}
+	}
+	return len(nums1) < len(nums2)
+}
+
+func increasingTriplet(nums []int) bool {
+	// 两个数组都保存递增的
+	triple1 := make([]int, 0, 2)
+	triple2 := make([]int, 0, 2)
+	for _, n := range nums {
+		if len(triple1) == 0 {
+			triple1 = append(triple1, n)
+			continue
+		}
+		switch len(triple1) {
+		case 0:
+			triple1 = append(triple1, n)
+		case 1:
+			if n > triple1[0] {
+				triple1 = append(triple1, n)
+			} else if n < triple1[0] {
+				triple1[0] = n
+			}
+		case 2:
+			if n > triple1[1] {
+				return true
+			}
+			if len(triple2) == 1 && n > triple2[0] {
+				triple2 = append(triple2, n)
+				triple1 = triple2
+				triple2 = make([]int, 0, 2)
+				continue
+			}
+			if triple1[0] < n && n < triple1[1] {
+				triple1[1] = n
+			} else if n < triple1[0] && n < triple1[1] {
+				switch len(triple2) {
+				case 0:
+					triple2 = append(triple2, n)
+				case 1:
+					triple2[0] = n
+				}
+			}
+		}
+	}
+	return false
+}
+
+func integerReplacement(n int) int {
+	times := 0
+	for n != 1 {
+		switch n % 2 {
+		case 1:
+			times++
+			timesAdd := integerReplacement(n - 1)
+			timesDel := integerReplacement(n + 1)
+			if timesAdd > timesDel {
+				return times + timesDel
+			} else {
+				return times + timesAdd
+			}
+		case 0:
+			n = n / 2
+			times++
+		}
+	}
+	return times
+}
+
+func longestPalindromeCount(s string) int {
+	m := make(map[rune]int)
+	for _, c := range s {
+		m[c]++
+	}
+	calSingle := false
+	length := 0
+	for _, v := range m {
+		switch v % 2 {
+		case 0:
+			length += v
+		case 1:
+			if !calSingle {
+				length += v
+				calSingle = true
+			} else {
+				length += v - 1
+			}
+		}
+
+	}
+	return length
+}
+
+func splitArray(nums []int, m int) int {
+	sumNum := 0
+	for _, num := range nums {
+		sumNum += num
+	}
+	avg := sumNum / m
+	//s := make([]int, 0, len(nums))
+	val, maxVal := nums[0], nums[0]
+	for i := 1; i < len(nums); i++ {
+		if val+nums[i] > avg && m > 1 {
+			//s = append(s, i)
+			m--
+			val = nums[i]
+			if val > maxVal {
+				maxVal = val
+			}
+			continue
+		}
+		val += nums[i]
+		if val > maxVal {
+			maxVal = val
+		}
+	}
+	return maxVal
+}
+
+func longestPalindromeV2(s string) string {
+	sub := make([][]bool, len(s))
+	for i := 0; i < len(s); i++ {
+		sub[i] = make([]bool, len(s))
+		sub[i][i] = true
+	}
+	maxLen, startIndex, endIndex := 0, 0, 0
+	for j := 1; j < len(s); j++ {
+		for i := 0; i < j; i++ {
+			if i+1 == j && s[i] == s[j] {
+				sub[i][j] = true
+			}
+			if s[i] == s[j] && sub[i+1][j-1] {
+				sub[i][j] = true
+			}
+			if sub[i][j] && j-i+1 > maxLen {
+				maxLen = j - i + 1
+				startIndex, endIndex = i, j
+			}
+		}
+	}
+	return s[startIndex : endIndex+1]
+}
+
+func eraseOverlapIntervals(intervals [][]int) int {
+	sort.Slice(intervals, func(i, j int) bool {
+		if intervals[i][0] != intervals[j][0] {
+			return intervals[i][0] < intervals[j][0]
+		} else {
+			return intervals[i][1] < intervals[j][1]
+		}
+	})
+	nums := make([][]int, 0, len(intervals))
+	nums = append(nums, intervals[0])
+	for i := 1; i < len(intervals); i++ {
+		if intervals[i][0] < nums[len(nums)-1][1] {
+			if intervals[i][1] < nums[len(nums)-1][1] {
+				nums[len(nums)-1] = intervals[i]
+			}
+			continue
+		}
+		nums = append(nums, intervals[i])
+	}
+	return len(intervals) - len(nums)
+}
+
+func findMinArrowShots(points [][]int) int {
+	sort.Slice(points, func(i, j int) bool {
+		if points[i][0] != points[j][0] {
+			return points[i][0] < points[j][0]
+		} else {
+			return points[i][1] < points[j][1]
+		}
+	})
+	s := make([][]int, 0, len(points))
+	s = append(s, points[0])
+	for i := 1; i < len(points); i++ {
+		if s[len(s)-1][1] >= points[i][0] {
+			left := points[i][0]
+			right := s[len(s)-1][1]
+			if points[i][1] < s[len(s)-1][1] {
+				right = points[i][1]
+			}
+			s[len(s)-1] = []int{left, right}
+			continue
+		}
+		s = append(s, points[i])
+	}
+	return len(s)
+}
+
+func findContentChildren(g []int, s []int) int {
+	sort.Ints(g)
+	sort.Ints(s)
+	var count int
+	for gIndex, sIndex := 0, 0; gIndex < len(g)-1 && sIndex < len(s)-1; sIndex++ {
+		if s[sIndex] >= g[gIndex] {
+			gIndex++
+			count++
+		}
+	}
+	return count
+}
+
+func findMaximizedCapital(k, w int, profits, capital []int) int {
+	n := len(profits)
+	type pair struct{ c, p int }
+	arr := make([]pair, n)
+	for i, p := range profits {
+		arr[i] = pair{capital[i], p}
+	}
+	sort.Slice(arr, func(i, j int) bool { return arr[i].c < arr[j].c })
+
+	h := &hp{}
+	for cur := 0; k > 0; k-- {
+		for cur < n && arr[cur].c <= w {
+			heap.Push(h, arr[cur].p)
+			cur++
+		}
+		if h.Len() == 0 {
+			break
+		}
+		w += heap.Pop(h).(int)
+	}
+	return w
+}
+
+type hp struct{ sort.IntSlice }
+
+func (h hp) Less(i, j int) bool  { fmt.Println("i am here"); return h.IntSlice[i] > h.IntSlice[j] }
+func (h *hp) Push(v interface{}) { h.IntSlice = append(h.IntSlice, v.(int)) }
+func (h *hp) Pop() interface{} {
+	a := h.IntSlice
+	v := a[len(a)-1]
+	h.IntSlice = a[:len(a)-1]
+	return v
+}
+
+func findMinMoves(machines []int) int {
+	var avg, total, max int
+	for _, val := range machines {
+		total += val
+		if val > max {
+			max = val
+		}
+	}
+	if total%len(machines) != 0 {
+		return -1
+	}
+	avg = total / len(machines)
+	return max - avg
+}
+
+func arrayPairSum(nums []int) int {
+	quickSort(nums, 0, len(nums)-1)
+	var sum int
+	for i := 0; i < len(nums); {
+		sum += nums[i]
+		i += 2
+	}
+	return sum
+}
+
+func quickSort(A []int, p, r int) {
+	if p < r {
+		q := partition(A, p, r)
+		quickSort(A, p, q-1)
+		quickSort(A, q, r)
+	}
+
+}
+
+func partition(A []int, p, r int) int {
+	x := A[r]
+	i := p - 1
+	for j := p; j < r; j++ {
+		if A[j] <= x {
+			i++
+			A[i], A[j] = A[j], A[i]
+		}
+	}
+	A[i+1], A[r] = A[r], A[i+1]
+	return i + 1
+}
+
+func findUnsortedSubarray(nums []int) int {
+	if len(nums) <= 1 {
+		return 0
+	}
+	minValList := make([]int, 0, len(nums))
+	minVal := nums[len(nums)-1]
+	for i := len(nums) - 1; i >= 0; i-- {
+		if nums[i] < minVal {
+			minVal = nums[i]
+		}
+		minValList = append(minValList, minVal)
+	}
+	wrongSlice := make([]int, 0, len(nums))
+	maxVal := nums[0]
+	for i, num := range nums {
+		if num != minValList[len(nums)-i-1] {
+			wrongSlice = append(wrongSlice, i)
+		}
+		if maxVal > num {
+			wrongSlice = append(wrongSlice, i)
+		} else {
+			maxVal = num
+		}
+	}
+	if len(wrongSlice) < 2 {
+		return 0
+	}
+	return wrongSlice[len(wrongSlice)-1] - wrongSlice[0] + 1
+}
+
+func canPlaceFlowers(flowerbed []int, n int) bool {
+	var count int
+	for i := 0; i < len(flowerbed); i++ {
+		if flowerbed[i] == 1 {
+			continue
+		}
+		left := 0
+		if i != 0 {
+			left = flowerbed[i-1]
+		}
+		right := 0
+		if i != len(flowerbed)-1 {
+			right = flowerbed[i+1]
+		}
+		if left == 0 && right == 0 {
+			count++
+			flowerbed[i] = 1
+		}
+	}
+	return count >= n
+}
+
+func triangleNumber(nums []int) int {
+	sort.Ints(nums)
+	m := make(map[int]int)
+	for _, n := range nums {
+		m[n]++
+	}
+	var count int
+	for i := 0; i < len(nums)-2; i++ {
+		for j := i + 1; j < len(nums)-1; j++ {
+			validSlice := make([]int, 0, len(nums))
+			for k := j + 1; k < len(nums); k++ {
+				if nums[k] >= nums[j] && nums[k] < nums[i]+nums[j] {
+					validSlice = append(validSlice, k)
+					continue
+				} else {
+					break
+				}
+			}
+			for _, index := range validSlice {
+				count += m[nums[index]]
+			}
+		}
+	}
+	return count
+}
+
+func convertToBase7(num int) string {
+	if num == 0 {
+		return "0"
+	}
+	isNeg := false
+	if num < 0 {
+		isNeg = true
+		num = -num
+	}
+	var s []string
+	for num > 0 {
+		s = append(s, strconv.Itoa(num%7))
+		num /= 7
+	}
+	var res string
+	for i := len(s) - 1; i >= 0; i-- {
+		res += s[i]
+	}
+	if isNeg {
+		res = "-" + res
+	}
+	return res
+}
+
+type TreeNode struct {
+	Val   int
+	Left  *TreeNode
+	Right *TreeNode
+}
+
+func traversal(res *[]int, child *TreeNode) {
+	if child == nil {
+		return
+	}
+	traversal(res, child.Left)
+	*res = append(*res, child.Val)
+	traversal(res, child.Right)
+}
+
+func inorderTraversal(root *TreeNode) []int {
+	res := make([]int, 0)
+	traversal(&res, root)
+	return res
+}
+func TestSlice(res []int) []int {
+	res = append(res, 1)
+	res[0] = 2
+	return res
+}
+
+func TestMap(m map[int]bool) {
+	m[1] = true
+}
+
+type Node struct {
+	Val  int64
+	Next *Node
+}
+
+func (n *Node) Print() {
+	if n == nil {
+		return
+	}
+	fmt.Printf("%d->", n.Val)
+	n.Next.Print()
+}
+
+func reverse(n *Node) *Node {
+	stack := make([]*Node, 0)
+	curNode := n
+	for curNode != nil {
+		stack = append(stack, curNode)
+		curNode = curNode.Next
+	}
+	for i := len(stack) - 1; i >= 0; i-- {
+		if i == 0 {
+			stack[i].Next = nil
+		} else {
+			stack[i].Next = stack[i-1]
+		}
+	}
+	return stack[len(stack)-1]
+}
+
+func reverseV2(n *Node) (*Node, *Node) {
+	if n.Next == nil {
+		return n, n
+	}
+	beginNode, nextNode := reverseV2(n.Next)
+	nextNode.Next = n
+	n.Next = nil
+	return beginNode, n
+}
+
+func funcAppend(s []int64) {
+	s2 := append(s, 10)
+	s2[0] = 100
+}
+
+func jump(nums []int) int {
+	if len(nums) == 1 {
+		return 0
+	}
+	if nums[0] >= len(nums)-1 {
+		return 1
+	}
+	stack := make([][]int, 0, len(nums))
+	stack = append(stack, []int{nums[0], 0})
+	stack = append(stack, []int{nums[1], 1})
+	for i := 2; i < len(nums)-1; i++ {
+		stackTop := stack[len(stack)-1]
+		stackSecondTop := stack[len(stack)-2]
+		if stackTop[0]+stackTop[1] >= len(nums)-1 {
+			break
+		}
+		if stackSecondTop[0]+stackSecondTop[1] >= i {
+			if nums[i]+i > stackTop[0]+stackTop[1] {
+				stack[len(stack)-1] = []int{nums[i], i}
+			}
+		} else {
+			stack = append(stack, []int{nums[i], i})
+		}
+	}
+	return len(stack)
+}
+
+func permute(nums []int) [][]int {
+	if len(nums) == 1 {
+		return [][]int{nums}
+	}
+	res := make([][]int, 0)
+	for i := 0; i < len(nums); i++ {
+		count := len(nums) - 1
+		for count > 0 {
+			l := []int{nums[i]}
+			res = append(res, l)
+			count--
+		}
+	}
+	var index int
+	var getElem func(int) int
+	getElem = func(i int) int {
+		for {
+			if index == len(nums) {
+				index = 0
+			}
+			if nums[index] != i {
+				r := nums[index]
+				index++
+				return r
+			}
+			index++
+		}
+	}
+	for i := 1; i < len(nums); i++ {
+		index = i
+		for j := 0; j < len(res); j++ {
+			elem := getElem(res[j][0])
+			res[j] = append(res[j], elem)
+		}
+	}
+	return res
+}
+
+func permuteUnique(nums []int) [][]int {
+	stack := make([]int, 0, len(nums))
+	usedIndex := make([]bool, len(nums))
+	unuseNum := make(map[int]int)
+	for _, num := range nums {
+		unuseNum[num]++
+	}
+	res := make([][]int, 0)
+	var inner func()
+	inner = func() {
+		if len(stack) == len(nums) {
+			res = append(res, append([]int{}, stack...))
+			return
+		}
+		//unuseNum := make(map[int]bool)
+		//for i, num := range nums {
+		//	if !usedIndex[i] {
+		//		unuseNum[num] = true
+		//	}
+		//}
+		for i, num := range nums {
+			if !usedIndex[i] && unuseNum[num] > 0 {
+				usedIndex[i] = true
+				count := unuseNum[num]
+				unuseNum[num] = 0
+
+				stack = append(stack, num)
+				inner()
+				stack = stack[:len(stack)-1]
+
+				usedIndex[i] = false
+				unuseNum[num] = count - 1
+			}
+
+		}
+	}
+	inner()
+	return res
+}
+
+func canCompareType() {
+	var a [4]int
+	var b [4]int
+	a[1] = 1
+	fmt.Printf("a[%T]==b[%T] is %t\n", a, b, a == b)
+	var c struct{
+		m int
+	}
+	var d struct{
+		m int
+	}
+	fmt.Printf("c[%T]==d[%T] is %t\n", c, d, c == d)
+	//var e func(a int) error
+	//var f func(a int) error
+	//fmt.Printf("e[%T]==f[%T] is %t", e, f, e == f)
+	//同一个make创建的或者都为nil才相等
+	var g chan bool
+	var h chan bool
+	fmt.Printf("g[%T]==h[%T] is %t\n", g, h, g == h)
+	i := make(chan bool, 10)
+	j := make(chan bool, 10)
+	//i <- true
+	//j <- false fmt.Printf("g[%T]==j[%T] is %t\n", g, j, g == j)
+	fmt.Printf("i[%T]==j[%T] is %t\n", i, j, i == j)
+	nums1 := 8
+	//nums2 := 8
+	ptr1 := &nums1
+	ptr2 := &nums1
+	fmt.Printf("ptr1[%T]==ptr2[%T] is %t\n", ptr1, ptr2, ptr1 == ptr2)
+	var k interface{}
+	var l interface{}
+	fmt.Printf("k[%T]==l[%T] is %t\n", k, l, k ==l)
+	k = "abk"
+	l = "abc"
+	fmt.Printf("k[%T]==l[%T] is %t\n", k, l, k ==l)
+	l = "abk"
+	fmt.Printf("k[%T]==l[%T] is %t\n", k, l, k ==l)
+	l = 10
+	fmt.Printf("k[%T]==l[%T] is %t\n", k, l, k ==l)
+	q := map[chan bool]int{}
+	fmt.Printf("%#v\n", q)
+	o := map[interface{}]int{}
+	fmt.Printf("%#v\n", o)
+	p := map[*int]int{}
+	fmt.Printf("%#v\n", p)
+}
 func main() {
+
+	canCompareType()
+	os.Exit(0)
 	//fmt.Printf("hello, world\n")
+	fmt.Println("permuteUnique: ", permuteUnique([]int{1, 1, 3}))
+	fmt.Println("permuteUnique: ", permuteUnique([]int{1, 2, 3}))
+	os.Exit(0)
+	fmt.Println("permute", permute([]int{1, 2, 3}))
+	fmt.Println("permute", permute([]int{1, 2, 3, 4}))
+	os.Exit(0)
+	fmt.Println("jump: ", jump([]int{2, 3, 1, 1, 4}))
+	fmt.Println("jump: ", jump([]int{1, 1, 1, 1}))
+	fmt.Println("jump: ", jump([]int{0}))
+	os.Exit(0)
+	slice1 := []int64{1, 2, 3, 4, 5}
+	slice2 := slice1[2:]
+	funcAppend(slice2)
+	fmt.Println(slice1)
+	fmt.Println(slice2)
+	os.Exit(0)
+	list := &Node{
+		Val: 1,
+		Next: &Node{
+			Val: 2,
+			Next: &Node{
+				Val: 3,
+				Next: &Node{
+					Val:  4,
+					Next: nil,
+				},
+			},
+		},
+	}
+	//reverse(list).Print()
+	beginNode, _ := reverseV2(list)
+	beginNode.Print()
+	os.Exit(0)
+	root := &TreeNode{
+		Val: 1,
+		Left: &TreeNode{
+			Val: 2,
+			Left: &TreeNode{
+				Val: 4,
+				Left: &TreeNode{
+					Val:   6,
+					Left:  nil,
+					Right: nil,
+				},
+				Right: &TreeNode{
+					Val: 7,
+					Left: &TreeNode{
+						Val:   8,
+						Left:  nil,
+						Right: nil,
+					},
+					Right: &TreeNode{
+						Val:   9,
+						Left:  nil,
+						Right: nil,
+					},
+				},
+			},
+			Right: &TreeNode{
+				Val:   5,
+				Left:  nil,
+				Right: nil,
+			},
+		},
+		Right: &TreeNode{
+			Val:   3,
+			Left:  nil,
+			Right: nil,
+		},
+	}
+
+	fmt.Println("inorderTraversal: ", inorderTraversal(root))
+	os.Exit(0)
+	fmt.Println("convertToBase7: ", convertToBase7(100))
+	fmt.Println("convertToBase7: ", convertToBase7(-7))
+	os.Exit(0)
+	fmt.Println("triangleNumber: ", triangleNumber([]int{2, 2, 3, 4}))
+	fmt.Println("triangleNumber: ", triangleNumber([]int{4, 2, 3, 4}))
+	os.Exit(0)
+	fmt.Println("canPlaceFlowers: ", canPlaceFlowers([]int{1, 0, 0, 0, 1}, 1))
+	fmt.Println("canPlaceFlowers: ", canPlaceFlowers([]int{1, 0, 0, 0, 1}, 2))
+	fmt.Println("canPlaceFlowers: ", canPlaceFlowers([]int{0, 0, 1, 0, 1}, 1))
+	os.Exit(0)
+	fmt.Println("findUnsortedSubarray: ", findUnsortedSubarray([]int{2, 6, 4, 8, 10, 9, 15}))
+	fmt.Println("findUnsortedSubarray: ", findUnsortedSubarray([]int{1, 2, 3, 4}))
+	fmt.Println("findUnsortedSubarray: ", findUnsortedSubarray([]int{1}))
+	fmt.Println("findUnsortedSubarray: ", findUnsortedSubarray([]int{2, 3, 4, 1}))
+	fmt.Println("findUnsortedSubarray: ", findUnsortedSubarray([]int{-1, -1, -1, -1}))
+	fmt.Println(findMaximizedCapital(2, 0, []int{1, 2, 3}, []int{0, 1, 1}))
+	fmt.Println(findMaximizedCapital(3, 0, []int{1, 2, 3}, []int{0, 1, 2}))
+	fmt.Println(findMaximizedCapital(1, 0, []int{1, 2, 3}, []int{1, 1, 2}))
+	os.Exit(0)
 	fmt.Println(isBigger("3", "35"))
 	fmt.Println(isBigger("3", "32"))
 	fmt.Println(isBigger("111311", "1113"))
@@ -826,8 +1606,56 @@ func main() {
 	fmt.Println(bInt - aInt)
 	fmt.Println("removeDuplicateLetters: ", removeDuplicateLetters("cbacdcbc"))
 	fmt.Println("removeDuplicateLetters: ", removeDuplicateLetters("bcabc"))
+	fmt.Println("removeKdigits: ", removeKdigits("1432219", 3))
+	fmt.Println("removeKdigits: ", removeKdigits("10200", 1))
+	fmt.Println("removeKdigits: ", removeKdigits("10", 2))
+	fmt.Println("removeKdigits: ", removeKdigits("11", 2))
+	fmt.Println("removeKdigits: ", removeKdigits("9", 1))
+	fmt.Println("maxList", maxList([]int{8, 9}, 2))
+	fmt.Println("maxList", maxList([]int{8, 6, 9}, 2))
+	fmt.Println("maxList", maxList([]int{3, 4, 6, 5}, 2))
+	fmt.Println("maxList", maxList([]int{9, 1, 2, 5, 8, 3}, 3))
+	fmt.Println("merge", merge([]int{6, 5}, []int{9, 8, 3}))
+	fmt.Println("merge", merge([]int{6, 3, 5}, []int{6, 7, 3}))
+	fmt.Println("merge", merge([]int{6, 3, 5}, []int{6, 3, 5}))
+	fmt.Println("maxNumber", maxNumber([]int{3, 4, 6, 5}, []int{9, 1, 2, 5, 8, 3}, 5))
+	fmt.Println("maxNumber", maxNumber([]int{6, 7}, []int{6, 0, 4}, 5))
+	fmt.Println("maxNumber", maxNumber([]int{8, 6, 9}, []int{1, 7, 5}, 3))
 
-
+	fmt.Println("increasingTriplet: ", increasingTriplet([]int{2, 1, 5, 0, 4, 6}))
+	fmt.Println("increasingTriplet: ", increasingTriplet([]int{1, 5, 0, 4, 1, 3}))
+	fmt.Println("integerReplacement: ", integerReplacement(1))
+	fmt.Println("integerReplacement: ", integerReplacement(2))
+	fmt.Println("integerReplacement: ", integerReplacement(3))
+	fmt.Println("integerReplacement: ", integerReplacement(4))
+	fmt.Println("integerReplacement: ", integerReplacement(5))
+	fmt.Println("integerReplacement: ", integerReplacement(6))
+	fmt.Println("integerReplacement: ", integerReplacement(7))
+	fmt.Println("integerReplacement: ", integerReplacement(8))
+	fmt.Println("integerReplacement: ", integerReplacement(9))
+	fmt.Println("integerReplacement: ", integerReplacement(10))
+	fmt.Println("integerReplacement: ", integerReplacement(11))
+	fmt.Println("integerReplacement: ", integerReplacement(12))
+	fmt.Println("integerReplacement: ", integerReplacement(13))
+	fmt.Println("integerReplacement: ", integerReplacement(14))
+	fmt.Println("integerReplacement: ", integerReplacement(15))
+	fmt.Println("integerReplacement: ", integerReplacement(16))
+	fmt.Println("longestPalindromeCount: ", longestPalindromeCount("abccccdd"))
+	fmt.Println("longestPalindromeCount: ", longestPalindromeCount("a"))
+	fmt.Println("longestPalindromeCount: ", longestPalindromeCount("bb"))
+	fmt.Println("splitArray: ", splitArray([]int{7, 2, 5, 10, 8}, 2))
+	fmt.Println("splitArray: ", splitArray([]int{1, 2, 3, 4, 5}, 2))
+	fmt.Println("splitArray: ", splitArray([]int{1, 4, 4}, 3))
+	fmt.Println("longestPalindromeV2: ", longestPalindromeV2("babad"))
+	fmt.Println("longestPalindromeV2: ", longestPalindromeV2("cbdd"))
+	fmt.Println("eraseOverlapIntervals: ", eraseOverlapIntervals([][]int{{1, 2}, {2, 3}, {3, 4}, {1, 3}}))
+	fmt.Println("eraseOverlapIntervals: ", eraseOverlapIntervals([][]int{{1, 2}, {1, 2}, {1, 2}}))
+	fmt.Println("eraseOverlapIntervals: ", eraseOverlapIntervals([][]int{{1, 2}, {2, 3}}))
+	fmt.Println("eraseOverlapIntervals: ", eraseOverlapIntervals([][]int{{-52, 31}, {-73, -26}, {82, 97}, {-65, -11}, {-62, -49}, {95, 99}, {58, 95}, {-31, 49}, {66, 98}, {-63, 2}, {30, 47}, {-40, -26}}))
+	fmt.Println("findMinArrowShots: ", findMinArrowShots([][]int{{10, 16}, {2, 8}, {1, 6}, {7, 12}}))
+	fmt.Println("findMinArrowShots: ", findMinArrowShots([][]int{{1, 2}, {3, 4}, {5, 6}, {7, 8}}))
+	fmt.Println("findMinArrowShots: ", findMinArrowShots([][]int{{1, 2}, {2, 3}, {3, 4}, {4, 5}}))
+	fmt.Println("findMinArrowShots: ", findMinArrowShots([][]int{{9, 12}, {1, 10}, {4, 11}, {8, 12}, {3, 9}, {6, 9}, {6, 7}}))
 	//l := []int{4343, 1, 7, 13, 4, 234, 3234, 5, 6, 3, 8, 9, 11, 321, 224, 999, 123, 444, 333}
 	//fmt.Println(arithmetic.SortOddEvenNum([]int{1,2,3,4,5,6,7,8,9,11,321,224,999,123,444,333}))
 	//arithmetic.InsertSort(l)

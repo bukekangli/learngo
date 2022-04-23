@@ -47,7 +47,7 @@ func alterPrint() {
 		i := 1
 		for {
 			select {
-			case <- letter:
+			case <-letter:
 				fmt.Println(i)
 				i++
 				fmt.Println(i)
@@ -61,7 +61,7 @@ func alterPrint() {
 		c := 'A'
 		for {
 			select {
-			case <- number:
+			case <-number:
 				fmt.Println(c)
 				c++
 				fmt.Println(c)
@@ -75,6 +75,7 @@ func alterPrint() {
 		}
 	}()
 }
+
 type ListNode struct {
 	Val  int
 	Next *ListNode
