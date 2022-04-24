@@ -1,7 +1,10 @@
 package arithmetic
 
-// 冒泡排序
+import "fmt"
+
 func BubbleSort(l []int) {
+	// 冒泡排序
+	// 原地排序算法，时间复杂度O(n*n)
 	length := len(l)
 	if length <= 1 {
 		return
@@ -20,8 +23,9 @@ func BubbleSort(l []int) {
 	}
 }
 
-// 插入排序
 func InsertSort(l []int) {
+	// 插入排序
+	// 原地排序算法、时间复杂度为O(n*n)
 	length := len(l)
 	for i := 1; i < length; i++ {
 		value := l[i]
@@ -37,8 +41,9 @@ func InsertSort(l []int) {
 	}
 }
 
-// 选择排序
 func SelectSort(l []int) {
+	// 选择排序
+	// 原地排序算法，时间复杂度O(n*n)
 	length := len(l)
 	for i := 0; i < length; i++ {
 		minIndex := i
@@ -51,45 +56,10 @@ func SelectSort(l []int) {
 	}
 }
 
-// 归并排序
-// 递推公式：merge_sort(0, n) = merge_sort(0, i) + merge_sort(i+1, n)
-// 我这个版本不是原地排序还比较复杂
-
-func MyMergeSort(l []int) []int {
-	var mergeList []int
-	length := len(l)
-	if length <= 1 {
-		return l
-	}
-	i := len(l) / 2
-	l1 := MyMergeSort(l[:i])
-	l2 := MyMergeSort(l[i:])
-	l1Length, l2Length := len(l1), len(l2)
-	l1Index, l2Index := 0, 0
-	for {
-		if l1[l1Index] < l2[l2Index] {
-			mergeList = append(mergeList, l1[l1Index])
-			l1Index++
-		} else {
-			mergeList = append(mergeList, l2[l2Index])
-			l2Index++
-		}
-		if l1Index >= l1Length {
-			for _, val := range l2[l2Index:] {
-				mergeList = append(mergeList, val)
-			}
-			break
-		} else if l2Index >= l2Length {
-			for _, val := range l1[l1Index:] {
-				mergeList = append(mergeList, val)
-			}
-			break
-		}
-	}
-	return mergeList
-}
-
 func MergeSort(arr []int) {
+	// 归并排序
+	// 递推公式：merge_sort(0, n) = merge_sort(0, i) + merge_sort(i+1, n)
+	// 这个时间复杂度是O(n*lgn)，空间复杂度为O(n*n)
 	mergeSort(arr, 0, len(arr)-1)
 }
 
@@ -127,4 +97,99 @@ func merge(arr []int, head int, mid int, tail int) {
 	for index, val := range mergeSlice {
 		arr[head+index] = val
 	}
+}
+
+type quickS struct {
+	nums []int
+}
+
+func newQuickS(nums []int) quickS {
+	return quickS{nums: nums}
+}
+func (s *quickS) _quickSort(p, r int) {
+	if p < r {
+		q := s.partition(p, r)
+		s._quickSort(p, q-1)
+		s._quickSort(q+1, r)
+	}
+}
+func (s *quickS) quickSort() {
+	s._quickSort(0, len(s.nums)-1)
+}
+
+func (s *quickS) partition(p, r int) int {
+	x := s.nums[r]
+	i := p - 1
+	for j := p; j <= r-1; j++ {
+		if s.nums[j] <= x {
+			i = i + 1
+			s.nums[i], s.nums[j] = s.nums[j], s.nums[i]
+		}
+	}
+	s.nums[i+1], s.nums[r] = s.nums[r], s.nums[i+1]
+	return i + 1
+}
+
+func QuickSort(nums []int) {
+	q := newQuickS(nums)
+	q.quickSort()
+}
+
+type heap struct {
+	nums     []int
+	heapSize int
+}
+
+func newHeap(nums []int) heap {
+	return heap{nums: nums}
+}
+
+func (h *heap) parent(i int) int {
+	return (i - 1) / 2
+}
+
+func (h *heap) left(i int) int {
+	return 2*i + 1
+}
+
+func (h *heap) right(i int) int {
+	return 2*i + 2
+}
+
+func (h *heap) maxHeapify(i int) {
+	largest := i
+	l := h.left(i)
+	r := h.right(i)
+	if l < h.heapSize && h.nums[l] > h.nums[i] {
+		largest = l
+	}
+	if r < h.heapSize && h.nums[r] > h.nums[largest] {
+		largest = r
+	}
+	if largest != i {
+		h.nums[i], h.nums[largest] = h.nums[largest], h.nums[i]
+		h.maxHeapify(largest)
+	}
+}
+
+func (h *heap) buildMaxHeap() {
+	h.heapSize = len(h.nums)
+	for i := len(h.nums) / 2; i >= 0; i-- {
+		h.maxHeapify(i)
+	}
+}
+
+func (h *heap) heapSort() {
+	h.buildMaxHeap()
+	fmt.Println(h.nums)
+	for i := len(h.nums) - 1; i >= 1; i-- {
+		h.nums[0], h.nums[i] = h.nums[i], h.nums[0]
+		h.heapSize--
+		h.maxHeapify(0)
+	}
+}
+
+func HeapSort(nums []int) {
+	h := newHeap(nums)
+	h.heapSort()
 }
