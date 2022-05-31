@@ -85,9 +85,42 @@ func TestRotateRight(t *testing.T) {
 			res = res.Next
 		}
 	}
-	print(arithmetic.RotateRight(initL(), 1))
-	t.Logf("-------")
-	print(arithmetic.RotateRight(initL(), 2))
-	t.Logf("-------")
-	print(arithmetic.RotateRight(initL(), 3))
+	//print(arithmetic.RotateRight(initL(), 1))
+	//t.Logf("-------")
+	//print(arithmetic.RotateRight(initL(), 2))
+	//t.Logf("-------")
+	//print(arithmetic.RotateRight(initL(), 3))
+	print(arithmetic.ListNodeReverseV1(initL()))
+	print(arithmetic.ListNodeReverseV2(initL()))
+}
+
+func TestUniquePaths(t *testing.T) {
+	t.Logf("%v", arithmetic.UniquePaths(3, 7))
+	t.Logf("%v", arithmetic.UniquePaths(3, 2))
+	t.Logf("%v", arithmetic.UniquePaths(7, 3))
+	t.Logf("%v", arithmetic.UniquePaths(3, 3))
+}
+
+func TestUniquePathsWithObstacles(t *testing.T) {
+	t.Logf("%v", arithmetic.UniquePathsWithObstacles([][]int{{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}))
+	t.Logf("%v", arithmetic.UniquePathsWithObstacles([][]int{{0, 1}, {0, 0}}))
+}
+
+func TestMinPathSum(t *testing.T) {
+	t.Logf("%v", arithmetic.MinPathSum([][]int{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}}))
+	t.Logf("%v", arithmetic.MinPathSum([][]int{{1, 2, 3}, {4, 5, 6}}))
+}
+
+func TestPlusOne(t *testing.T) {
+	t.Logf("%v", arithmetic.PlusOne([]int{1, 2, 3}))
+	t.Logf("%v", arithmetic.PlusOne([]int{4, 3, 2, 1}))
+	t.Logf("%v", arithmetic.PlusOne([]int{0}))
+	t.Logf("%v", arithmetic.PlusOne([]int{9}))
+}
+
+func TestAddBinary(t *testing.T) {
+	t.Logf("%v", arithmetic.AddBinary("11", "1"))
+	t.Logf("%v", arithmetic.AddBinary("1010", "1011"))
+	t.Logf("%v", arithmetic.AddBinary("0", "0"))
+	t.Logf("%v", arithmetic.AddBinary("10100000100100110110010000010101111011011001101110111111111101000000101111001110001111100001101", "110101001011101110001111100110001010100001101011101010000011011011001011101111001100000011011110011"))
 }

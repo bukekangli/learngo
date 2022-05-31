@@ -378,29 +378,209 @@ func RotateRight(head *ListNode, k int) *ListNode {
 	if head == nil {
 		return nil
 	}
-	preNode := &ListNode{}
-	node := head
-	next := head.Next
-	for {
-		if node == nil {
+	iter := head
+	nodeLen := 1
+	for iter.Next != nil {
+		iter = iter.Next
+		nodeLen++
+	}
+	iter.Next = head
+	preNode := iter
+	iter = iter.Next
+	for k = nodeLen - k%nodeLen; k > 0; k-- {
+		preNode = iter
+		iter = iter.Next
+	}
+	preNode.Next = nil
+	return iter
+}
+
+// ListNodeReverseV1 插入法实现的链表反转
+func ListNodeReverseV1(head *ListNode) *ListNode {
+	node := &ListNode{}
+	node.Next = head
+	head = head.Next
+	node.Next.Next = nil
+
+	for head != nil {
+		tmp := head.Next
+		head.Next = node.Next
+		node.Next = head
+		head = tmp
+	}
+	return node.Next
+}
+
+// ListNodeReverseV2 递归法实现的链表反转
+func ListNodeReverseV2(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	newHead := ListNodeReverseV2(head.Next)
+	head.Next.Next = head
+	head.Next = nil
+	return newHead
+}
+
+func UniquePaths(m int, n int) int {
+	if m == 1 || n == 1 {
+		return 1
+	}
+	res := make([][]int, m)
+	for i, _ := range res {
+		res[i] = make([]int, n)
+		res[i][0] = 1
+	}
+	for j := 0; j < n; j++ {
+		res[0][j] = 1
+	}
+	for i := 1; i < m; i++ {
+		for j := 1; j < n; j++ {
+			res[i][j] = res[i-1][j] + res[i][j-1]
+		}
+	}
+	return res[m-1][n-1]
+}
+
+func UniquePathsWithObstacles(obstacleGrid [][]int) int {
+	if len(obstacleGrid) == 1 {
+		for i := 0; i < len(obstacleGrid[0]); i++ {
+			if obstacleGrid[0][i] == 1 {
+				return 0
+			}
+		}
+		return 1
+	}
+	if len(obstacleGrid[0]) == 1 {
+		for i := 0; i < len(obstacleGrid); i++ {
+			if obstacleGrid[i][0] == 1 {
+				return 0
+			}
+		}
+		return 1
+	}
+	if len(obstacleGrid) == 1 || len(obstacleGrid[0]) == 1 {
+		return 0
+	}
+	for i, _ := range obstacleGrid {
+		if obstacleGrid[i][0] == 1 {
 			break
 		}
-		next = node.Next
-		node.Next = preNode
-		preNode = node
-		node = next
+		obstacleGrid[i][0] = -1
 	}
-	var reverse func(node *ListNode) (*ListNode, *ListNode)
-	reverse = func(node *ListNode) (*ListNode, *ListNode) {
-		if node.Next != nil {
-			start, end := reverse(node.Next)
-			end.Next = node
-			node.Next = nil
-			return start, node
-		} else {
-			return node, node
+	for j := 0; j < len(obstacleGrid[0]); j++ {
+		if obstacleGrid[0][j] == 1 {
+			break
+		}
+		obstacleGrid[0][j] = -1
+	}
+	for i := 1; i < len(obstacleGrid); i++ {
+		for j := 1; j < len(obstacleGrid[0]); j++ {
+			val1 := obstacleGrid[i-1][j]
+			if val1 == 1 {
+				val1 = 0
+			}
+			val2 := obstacleGrid[i][j-1]
+			if val2 == 1 {
+				val2 = 0
+			}
+			if obstacleGrid[i][j] == 1 {
+				continue
+			}
+			obstacleGrid[i][j] = val1 + val2
 		}
 	}
-	start, _ := reverse(head)
-	return start
+	val := obstacleGrid[len(obstacleGrid)-1][len(obstacleGrid[0])-1]
+	if val == 1 {
+		return 0
+	}
+	return -val
+}
+
+func MinPathSum(grid [][]int) int {
+	for i := 1; i < len(grid); i++ {
+		grid[i][0] = grid[i][0] + grid[i-1][0]
+	}
+	for j := 1; j < len(grid[0]); j++ {
+		grid[0][j] = grid[0][j] + grid[0][j-1]
+	}
+	for i := 1; i < len(grid); i++ {
+		for j := 1; j < len(grid[0]); j++ {
+			grid[i][j] = grid[i][j] + min(grid[i-1][j], grid[i][j-1])
+		}
+	}
+	return grid[len(grid)-1][len(grid[0])-1]
+}
+
+func PlusOne(digits []int) []int {
+	flag := 0
+	for i := len(digits) - 1; i >= 0; i-- {
+		var val int
+		if i == len(digits)-1 {
+			val = digits[i] + 1
+		} else {
+			val = digits[i] + flag
+			flag = 0
+		}
+		if val >= 10 {
+			val -= 10
+			flag = 1
+		}
+		digits[i] = val
+	}
+	if flag != 0 {
+		tmp := make([]int, 1)
+		tmp[0] = 1
+		digits = append(tmp, digits...)
+	}
+	return digits
+}
+
+func AddBinary(a string, b string) string {
+	lenA, lenB := len(a), len(b)
+	longest := lenA
+	if lenB > lenA {
+		longest = lenB
+	}
+	var flag byte
+	r := ""
+	res := ""
+	for index := 0; index < longest; index++ {
+		var val1, val2 byte
+		if index < lenA {
+			val1 = a[lenA-1-index]
+		}
+		if index < lenB {
+			val2 = b[lenB-1-index]
+		}
+		r, flag = sum(val1, val2, flag)
+		res = r + res
+	}
+	if flag == '1' {
+		res = "1" + res
+	}
+	return res
+}
+
+func sum(a, b, c byte) (string, byte) {
+	count := 0
+	if a == '1' {
+		count++
+	}
+	if b == '1' {
+		count++
+	}
+	if c == '1' {
+		count++
+	}
+	switch count {
+	case 3:
+		return "1", '1'
+	case 2:
+		return "0", '1'
+	case 1:
+		return "1", '0'
+	default:
+		return "0", '0'
+	}
 }
