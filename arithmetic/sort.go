@@ -1,6 +1,9 @@
 package arithmetic
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func BubbleSort(l []int) {
 	// 冒泡排序
@@ -192,4 +195,21 @@ func (h *heap) heapSort() {
 func HeapSort(nums []int) {
 	h := newHeap(nums)
 	h.heapSort()
+}
+
+func Unique(s []int) uint {
+	sort.Ints(s)
+	firstIndex, secondIndex := 0, 1
+	for firstIndex < secondIndex && secondIndex < len(s) {
+		for s[firstIndex] == s[secondIndex] {
+			secondIndex++
+		}
+		if s[firstIndex+1] < s[secondIndex] {
+			firstIndex++
+			s[firstIndex], s[secondIndex] = s[secondIndex], s[firstIndex]
+		} else {
+			secondIndex++
+		}
+	}
+	return uint(firstIndex + 1)
 }

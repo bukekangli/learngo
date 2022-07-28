@@ -1,6 +1,7 @@
 package arithmetic_test
 
 import (
+	"fmt"
 	"github.com/bukekangli/learngo/arithmetic"
 	"testing"
 )
@@ -90,7 +91,7 @@ func TestRotateRight(t *testing.T) {
 	//print(arithmetic.RotateRight(initL(), 2))
 	//t.Logf("-------")
 	//print(arithmetic.RotateRight(initL(), 3))
-	print(arithmetic.ListNodeReverseV1(initL()))
+	//print(arithmetic.ListNodeReverseV1(initL()))
 	print(arithmetic.ListNodeReverseV2(initL()))
 }
 
@@ -123,4 +124,49 @@ func TestAddBinary(t *testing.T) {
 	t.Logf("%v", arithmetic.AddBinary("1010", "1011"))
 	t.Logf("%v", arithmetic.AddBinary("0", "0"))
 	t.Logf("%v", arithmetic.AddBinary("10100000100100110110010000010101111011011001101110111111111101000000101111001110001111100001101", "110101001011101110001111100110001010100001101011101010000011011011001011101111001100000011011110011"))
+}
+
+func TestIsInterfaceIsNil(t *testing.T) {
+	arithmetic.IsInterfaceIsNil()
+}
+
+func TestSolution(t *testing.T) {
+	head := &arithmetic.Node{
+		Data: 1,
+		Next: &arithmetic.Node{
+			Data: 2,
+			Next: &arithmetic.Node{
+				Data: 3,
+				Next: &arithmetic.Node{
+					Data: 4,
+					Next: &arithmetic.Node{
+						Data: 5,
+					},
+				},
+			},
+		},
+	}
+	ctx := arithmetic.Solution(head)
+	print := func(head *arithmetic.Node) {
+		for head != nil {
+			fmt.Printf("%d -> ", head.Data)
+			head = head.Next
+		}
+	}
+	print(ctx.First)
+	print(ctx.Second)
+}
+
+func TestSimplifyPath(t *testing.T) {
+	t.Logf("%s", arithmetic.SimplifyPath("/home/"))
+	t.Logf("%s", arithmetic.SimplifyPath("/../"))
+	t.Logf("%s", arithmetic.SimplifyPath("/a/./b/../../c/"))
+}
+
+func TestInput(t *testing.T) {
+	t.Logf("%v", arithmetic.Input([]int{2, 3, 1, 1}, 6))
+}
+
+func TestPrint(t *testing.T) {
+	arithmetic.Print("1a2b")
 }

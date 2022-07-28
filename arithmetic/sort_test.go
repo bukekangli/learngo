@@ -22,3 +22,15 @@ func TestQuickSort(t *testing.T) {
 	arithmetic.QuickSort(nums)
 	t.Logf("nums: %v", nums)
 }
+
+func TestUnique(t *testing.T) {
+	s := []int{3, 2, 3, 1, 5, 2, 1, 1, 3}
+	t.Logf("%v %v", arithmetic.Unique(s), s)
+}
+
+func Test(t *testing.T) {
+	c := make(chan bool, 2)
+	c <- true
+	close(c)
+	c <- true
+}

@@ -1,7 +1,10 @@
 package arithmetic
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -583,4 +586,156 @@ func sum(a, b, c byte) (string, byte) {
 	default:
 		return "0", '0'
 	}
+}
+
+func IsInterfaceIsNil() {
+	var writer io.Writer
+	fmt.Printf("writer is nil => %t\n", writer == nil)
+	var bufWriter *bufio.Writer
+	fmt.Printf("bufWriter is nil => %t\n", bufWriter == nil)
+	bufWriter2 := func() io.Writer {
+		var w *bufio.Writer
+		fmt.Printf("w is nil => %t\n", w == nil)
+		if w == nil {
+			return nil
+		}
+		return w
+	}()
+	// 因为bufWriter2会比较类型和值是不是都为nil，这时它已经有类型了
+	fmt.Printf("bufWriter is nil => %t\n", bufWriter2 == nil)
+	if bufWriter2 != nil {
+		bufWriter2.Write([]byte("golang"))
+	} else {
+		fmt.Println("bufWriter is nil")
+	}
+	bufWriter3 := func() io.Writer {
+		var w *bufio.Writer
+		fmt.Printf("w is nil => %t\n", w == nil)
+		return w
+	}()
+	fmt.Printf("bufWriter is nil => %t\n", bufWriter3 == nil)
+	fmt.Printf("IsNil => bufWriter is nil => %t\n", reflect.ValueOf(bufWriter3).IsNil())
+
+	fmt.Printf("IsNil => bufWriter is nil => %T\n", bufWriter)
+	fmt.Printf("IsNil => bufWriter is nil => %s\n", reflect.TypeOf(bufWriter).Kind())
+}
+
+type Node struct {
+	Data int
+	Next *Node
+}
+
+type CTX struct {
+	First  *Node
+	Second *Node
+}
+
+func Solution(head *Node) *CTX {
+	ctx := &CTX{}
+	first, second := &Node{}, &Node{}
+	var preFirst, preSecond *Node
+	flag := 0
+	ctx.First, ctx.Second = first, second
+	for head != nil {
+		if flag == 0 {
+			flag = 1
+			first.Data = head.Data
+			first.Next = &Node{}
+			preFirst = first
+			first = first.Next
+		} else {
+			flag = 0
+			second.Data = head.Data
+			second.Next = &Node{}
+			preSecond = second
+			second = second.Next
+		}
+		head = head.Next
+	}
+	preFirst.Next = nil
+	preSecond.Next = nil
+	return ctx
+}
+
+func SimplifyPath(path string) string {
+	stack := make([]string, 0)
+	for _, part := range strings.Split(path, "/") {
+		switch part {
+		case ".", "":
+			continue
+		case "..":
+			if len(stack) > 0 {
+				stack = stack[:len(stack)-1]
+			}
+		default:
+			stack = append(stack, part)
+		}
+	}
+	if len(stack) == 0 {
+		return "/"
+	}
+	return "/" + strings.Join(stack, "/")
+}
+
+// 2 3 1 1    6    out: 231 231
+func Input(list []int, target int) [][]int {
+	sort.Ints(list)
+	res := make([][]int, 0)
+	for i := 0; i < len(list); i++ {
+		head, tail := i+1, len(list)-1
+		for head < tail {
+			_sum := list[head] + list[tail] + list[i]
+			if _sum == target {
+				res = append(res, []int{list[i], list[head], list[tail]})
+				head++
+			} else if _sum > target {
+				tail--
+			} else {
+				head++
+			}
+		}
+	}
+	return res
+}
+
+func Print(s string) {
+	var wg sync.WaitGroup
+	c1 := make(chan struct{}, 1)
+	c2 := make(chan struct{}, 1)
+	buff := make(chan string, 1)
+	wg.Add(1)
+	go func() {
+		defer func() {
+			wg.Done()
+		}()
+		for {
+			<-c1
+			if val, ok := <-buff; ok {
+				fmt.Println(val)
+				c2 <- struct{}{}
+			} else {
+				break
+			}
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer func() {
+			wg.Done()
+		}()
+		for {
+			<-c2
+			if val, ok := <-buff; ok {
+				fmt.Println(val)
+				c1 <- struct{}{}
+			} else {
+				break
+			}
+		}
+	}()
+	c1 <- struct{}{}
+	for _, c := range s {
+		buff <- string(c)
+	}
+	wg.Wait()
 }
