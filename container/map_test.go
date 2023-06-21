@@ -1,15 +1,19 @@
 package container
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+	"testing"
+)
 
-func MapTest() {
+func MapTest(t *testing.T) {
 	m := map[string]string{
 		"name": "slk",
-		"age": "27",
+		"age":  "27",
 	}
 	m["school"] = "sy"
 
-	m2 := make(map[string]int)  // m2 == empty map
+	m2 := make(map[string]int) // m2 == empty map
 
 	var m3 map[string]int //  m3 == nil
 
@@ -33,4 +37,23 @@ func MapTest() {
 
 	fmt.Println("Delete values")
 	delete(m, "name")
+}
+
+func Test_ConcurrencyRead(t *testing.T) {
+	m := make(map[int]int)
+	for i := 0; i < 10; i++ {
+		m[i] = i
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			for {
+				for j := 0; j < 10; j++ {
+					_ = m[j]
+				}
+			}
+		}()
+	}
+	wg.Wait()
 }
