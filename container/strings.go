@@ -18,7 +18,6 @@ func StringTest() {
 
 	fmt.Println("Rune count ", utf8.RuneCountInString(s))
 
-
 	bytes := []byte(s)
 	for len(bytes) > 0 {
 		ch, size := utf8.DecodeRune(bytes)
@@ -26,8 +25,7 @@ func StringTest() {
 		fmt.Printf("%c ", ch)
 	}
 	for i, ch := range []rune(s) {
-		fmt.Printf("(%d c)", i, ch)
+		fmt.Printf("(%d %c)", i, ch)
 	}
 	fmt.Println()
 }
-
